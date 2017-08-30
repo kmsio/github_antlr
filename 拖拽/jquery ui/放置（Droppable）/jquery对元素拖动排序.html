@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>jquery学习-jquery对元素拖动排序</title>
+    <style type="text/css">
+        #show {
+            color: Red;
+        }
+
+        #list {
+            cursor: move;
+            width: 300px;
+        }
+
+        #list li {
+            border: solid 1px yellow;
+            float: left;
+            list-style-type: none;
+            margin-top: 10px;
+        }
+    </style>
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            //保存常用选择器
+            var list = $("#list"); //ul
+            var show = $("#show"); //输出提示
+            var orderlist = $("#orderlist");   //原顺序
+            var check = $("#check");   //是否更新到数据库
+
+            //保存原来的排列顺序
+            var order = [];
+            list.children("li").each(function () {
+                order.push(this.title); //原排列顺序保存在title，得到后更改title
+                $(this).attr("title", "你可以拖动进行排序");
+            });
+            orderlist.val(order.join());
+            //执行排列操作
+            list.sortable({
+                axis: 'y',//只能横向拖动
+                opacity: 0.7,// 移动时的透明度
+                update: function () {//当排序动作结束时且元素坐标已经发生改变时触发此事件。
+                    Submit(check.attr("checked"));
+                }
+            });
+
+            //ajax更新
+            var Update = function (itemid, itemorder) {
+                $.ajax({
+                    type: "post",
+                    url: "update.aspx",
+                    data: {id: itemid, order: orderlist.val()},   //id:新的排列对应的ID,order：原排列顺序
+                    beforeSend: function () {
+                        show.html("正在更新");
+                    },
+                    success: function (req) {
+                        if (req == "100") {
+                            show.html("更新成功");
+                        }
+                        else if (req == "001") {
+                            show.html("失败，请稍后再试");
+                        }
+                        else {
+                            show.html("参数不全");
+                        }
+                    }
+                });
+            };
+
+            //调用ajax更新方法
+            var Submit = function (update) {
+                var order = [];
+                list.children("li").each(function () {
+                    order.push(this.id);
+                });
+                var itemid = order.join(',');
+                //如果单选框选中，则更新表中排列顺序
+                if (update) {
+                    Update(itemid);
+                }
+                else {
+                    show.html("");
+                }
+            };
+
+
+        });
+    </script>
+</head>
+
+<body>
+<form method="post" action="jquery-drag-order-sort.aspx" id="form1">
+    <div class="aspNetHidden">
+        <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE"
+               value="/wEPDwUJNDc3MzMwNjM4D2QWAgIBD2QWAgIBDxYCHgtfIUl0ZW1Db3VudAIDFgZmD2QWAmYPFQMCMTQBMSdodHRwOi8vd3d3LmJhaWR1LmNvbS9pbWcvYmFpZHVfbG9nby5naWZkAgEPZBYCZg8VAwIxMwEyL2h0dHA6Ly93d3cuZ29vZ2xlLmNvbS5oay9pbWFnZXMvc3Jwci9sb2dvM3cucG5nZAICD2QWAmYPFQMCMTYBMyxodHRwOi8vaW1nMy5jbi5tc24uY29tL2ltYWdlcy8wODA5L2xvZ28xLnBuZ2RkDx67fZ2swhZiUjvFaE+ziATRZTct5b77PuWvqXLCUlg="/>
+    </div>
+
+    <span id="show"></span>
+    <h1>jQuery对元素拖动排序</h1>
+    <div>拖动时同时更新数据库数据：<input type="checkbox" id="check"/></div>
+    <div>
+        <input type="hidden" id="orderlist"/>
+        <ul id="list">
+
+            <li id="14" title="1">
+                <img alt="img" src="http://www.baidu.com/img/baidu_logo.gif"/></li>
+
+            <li id="13" title="2">
+                <img alt="img" src="http://www.google.com.hk/images/srpr/logo3w.png"/></li>
+
+            <li id="16" title="3">
+                <img alt="img" src="http://img3.cn.msn.com/images/0809/logo1.png"/></li>
+
+        </ul>
+    </div>
+</form>
+</body>
+</html>
