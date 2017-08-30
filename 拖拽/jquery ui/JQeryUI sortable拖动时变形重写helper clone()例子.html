@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>jQuery UI Sortable - Default functionality</title>
+    <script src="../js/jQuery1.11.3.min.js"></script>
+    <script src="../js/jquery-ui.js"></script>
+
+
+    <script>
+        $(function() {
+            //使用jqueryUI进行排序
+            $( "#sortable tbody").sortable({
+                axis: "y",//根据y轴拖动
+                helper:function(e,ele){
+                    //helper.clone()方法无用，自己重写
+                    var _original = ele.children();
+                    var _helper =ele.clone();
+                    _helper.children().each(function(index){
+                        $(this).width(_original.eq(index).width());
+                    });
+                    return _helper;
+                },
+
+                update:function(e,ui){
+
+                    //step1.tr上必须有id=""属性,如: id="id=1"
+                    //使用toArray方法。可以获取id数组，方便后台操作.效果id=1,id=2,id=3
+                    alert($( "#sortable tbody").sortable('toArray'));
+
+                }
+
+            });
+
+        });
+    </script>
+</head>
+<body>
+<table id="sortable" border=1 style="width:500px;">
+    <thead>
+    <tr >
+        <td>id</td>
+        <td>姓名</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr id="id=1">
+        <td>1</td>
+        <td>张三</td>
+    </tr>
+    <tr id="id=2">
+        <td>2</td>
+        <td>李四</td>
+    </tr>
+    <tr id="id=3">
+        <td>3</td>
+        <td>王五</td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>
